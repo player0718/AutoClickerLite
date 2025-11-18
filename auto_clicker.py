@@ -164,7 +164,7 @@ class AutoClicker:
     def __init__(self, root):
         self.root = root
         self.root.title("Auto Clicker")
-        self.root.geometry("400x560")
+        self.root.geometry("400x620")
         self.root.resizable(False, False)
         self.root.configure(bg=COLORS['bg'])
 
