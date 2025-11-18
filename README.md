@@ -1,172 +1,172 @@
-# 自动点击器 (Auto Clicker)
+# Auto Clicker
 
-一个简单易用的 Windows 桌面自动鼠标点击工具。
+A simple and easy-to-use Windows desktop automatic mouse clicking tool.
 
-## 功能特性
+## Features
 
-- 设置点击时间间隔（支持毫秒和秒）
-- 选择点击类型：左键单击、右键单击、左键双击
-- 选择点击位置：当前鼠标位置或固定坐标
-- 实时显示点击状态和计数
-- 故障保护：将鼠标移到屏幕左上角可停止程序
+- Set click interval (supports milliseconds and seconds)
+- Choose click type: left click, right click, left double-click
+- Choose click position: current mouse position or fixed coordinates
+- Real-time display of click status and count
+- Fail-safe: move mouse to top-left corner of screen to stop the program
 
-## 技术说明
+## Technical Notes
 
-### 为什么选择 Tkinter？
+### Why Tkinter?
 
-- **内置库**：Python 自带，无需额外安装 GUI 依赖
-- **轻量级**：程序体积小，启动快
-- **跨平台**：虽然本工具主要针对 Windows，但代码也可在其他系统运行
-- **易于打包**：使用 PyInstaller 打包时依赖更少
+- **Built-in library**: Comes with Python, no need to install additional GUI dependencies
+- **Lightweight**: Small program size, fast startup
+- **Cross-platform**: Although this tool is primarily for Windows, the code can run on other systems
+- **Easy to package**: Fewer dependencies when packaging with PyInstaller
 
-### 线程安全说明
+### Thread Safety
 
-本程序使用 Tkinter 的 `after()` 方法实现定时点击，而非多线程。这种方式：
-- 在主线程中执行，避免线程安全问题
-- 不会阻塞 GUI 界面
-- 代码更简洁，维护更容易
+This program uses Tkinter's `after()` method to implement timed clicking instead of multi-threading. This approach:
+- Executes in the main thread, avoiding thread safety issues
+- Does not block the GUI
+- Makes code simpler and easier to maintain
 
 ---
 
-## 第一步：环境准备
+## Step 1: Environment Setup
 
-### 1.1 安装 Python
+### 1.1 Install Python
 
-确保已安装 Python 3.7 或更高版本。在命令提示符中检查：
+Ensure Python 3.7 or higher is installed. Check in Command Prompt:
 
 ```bash
 python --version
 ```
 
-### 1.2 安装依赖库
+### 1.2 Install Dependencies
 
-打开命令提示符（CMD）或 PowerShell，执行：
+Open Command Prompt (CMD) or PowerShell and run:
 
 ```bash
 pip install pyautogui pyinstaller
 ```
 
-或者使用 requirements.txt：
+Or use requirements.txt:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**依赖说明：**
-- `pyautogui`：用于控制鼠标点击
-- `pyinstaller`：用于打包成 exe 文件
-- `tkinter`：Python 内置，无需安装
+**Dependencies:**
+- `pyautogui`: For controlling mouse clicks
+- `pyinstaller`: For packaging into exe files
+- `tkinter`: Built into Python, no installation needed
 
 ---
 
-## 第二步：运行程序
+## Step 2: Running the Program
 
-### 2.1 直接运行 Python 脚本
+### 2.1 Run Python Script Directly
 
-在项目目录下执行：
+In the project directory, execute:
 
 ```bash
 python auto_clicker.py
 ```
 
-### 2.2 使用方法
+### 2.2 Usage Instructions
 
-1. **设置点击间隔**：输入数字，选择单位（毫秒/秒）
-2. **选择点击类型**：左键单击、右键单击或左键双击
-3. **设置点击位置**：
-   - 勾选"使用当前鼠标位置"：点击时使用鼠标实时位置
-   - 取消勾选：输入固定的 X、Y 坐标
-4. **点击"开始"**：开始自动点击
-5. **点击"停止"**：停止自动点击
+1. **Set click interval**: Enter a number and select the unit (milliseconds/seconds)
+2. **Choose click type**: Left click, right click, or left double-click
+3. **Set click position**:
+   - Check "Use current mouse position": Uses real-time mouse position when clicking
+   - Uncheck: Enter fixed X, Y coordinates
+4. **Click "Start"**: Begin auto-clicking
+5. **Click "Stop"**: Stop auto-clicking
 
-**安全提示**：将鼠标快速移到屏幕左上角可触发故障保护，自动停止点击。
+**Safety tip**: Quickly move the mouse to the top-left corner of the screen to trigger fail-safe and automatically stop clicking.
 
 ---
 
-## 第三步：打包成 EXE 文件
+## Step 3: Package as EXE File
 
-### 3.1 基本打包命令
-
-```bash
-pyinstaller --onefile --windowed --name "自动点击器" auto_clicker.py
-```
-
-**参数说明：**
-- `--onefile`：打包成单个 exe 文件
-- `--windowed`：运行时不显示控制台窗口
-- `--name`：指定生成的 exe 文件名
-
-### 3.2 带图标打包（可选）
-
-如果你有一个 .ico 图标文件：
+### 3.1 Basic Packaging Command
 
 ```bash
-pyinstaller --onefile --windowed --name "自动点击器" --icon=icon.ico auto_clicker.py
+pyinstaller --onefile --windowed --name "AutoClicker" auto_clicker.py
 ```
 
-### 3.3 打包输出
+**Parameter descriptions:**
+- `--onefile`: Package into a single exe file
+- `--windowed`: Don't show console window when running
+- `--name`: Specify the generated exe file name
 
-打包完成后，exe 文件位于：
-```
-dist/自动点击器.exe
+### 3.2 Package with Icon (Optional)
+
+If you have an .ico icon file:
+
+```bash
+pyinstaller --onefile --windowed --name "AutoClicker" --icon=icon.ico auto_clicker.py
 ```
 
-### 3.4 清理打包临时文件（可选）
+### 3.3 Package Output
+
+After packaging is complete, the exe file is located at:
+```
+dist/AutoClicker.exe
+```
+
+### 3.4 Clean Up Temporary Files (Optional)
 
 ```bash
 rmdir /s /q build
-del 自动点击器.spec
+del AutoClicker.spec
 ```
 
 ---
 
-## 第四步：分发和使用
+## Step 4: Distribution and Use
 
-### 4.1 分发 exe 文件
+### 4.1 Distributing the exe File
 
-将 `dist/自动点击器.exe` 复制到任意 Windows 电脑即可运行，无需安装 Python。
+Copy `dist/AutoClicker.exe` to any Windows computer to run it without installing Python.
 
-### 4.2 系统要求
+### 4.2 System Requirements
 
-- Windows 10 或更高版本
-- 无需安装任何依赖
+- Windows 10 or higher
+- No dependencies required
 
-### 4.3 注意事项
+### 4.3 Important Notes
 
-1. **杀毒软件**：某些杀毒软件可能误报，需要添加信任
-2. **管理员权限**：某些应用可能需要以管理员身份运行才能点击
-3. **屏幕缩放**：如果使用固定坐标，注意 Windows 显示缩放设置可能影响坐标
-
----
-
-## 常见问题
-
-### Q: 点击没有反应？
-
-1. 检查目标窗口是否需要管理员权限
-2. 尝试以管理员身份运行自动点击器
-
-### Q: 坐标不准确？
-
-检查 Windows 显示设置中的缩放比例，建议设置为 100%。
-
-### Q: 如何紧急停止？
-
-快速将鼠标移到屏幕左上角（0,0 位置附近）即可触发故障保护。
+1. **Antivirus software**: Some antivirus software may flag false positives; you may need to add it to the trusted list
+2. **Administrator privileges**: Some applications may require running the auto-clicker as administrator to click
+3. **Screen scaling**: If using fixed coordinates, note that Windows display scaling settings may affect coordinates
 
 ---
 
-## 项目结构
+## FAQ
+
+### Q: Clicks not working?
+
+1. Check if the target window requires administrator privileges
+2. Try running the auto-clicker as administrator
+
+### Q: Coordinates are inaccurate?
+
+Check the scaling ratio in Windows Display Settings; it's recommended to set it to 100%.
+
+### Q: How to emergency stop?
+
+Quickly move the mouse to the top-left corner of the screen (near position 0,0) to trigger fail-safe.
+
+---
+
+## Project Structure
 
 ```
 AutoClickerLite/
-├── auto_clicker.py      # 主程序源代码
-├── requirements.txt     # Python 依赖列表
-└── README.md           # 说明文档
+├── auto_clicker.py      # Main program source code
+├── requirements.txt     # Python dependency list
+└── README.md           # Documentation
 ```
 
 ---
 
-## 许可证
+## License
 
 MIT License
