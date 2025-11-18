@@ -4,7 +4,7 @@
 自动点击器 - Windows 桌面自动鼠标点击工具
 使用 Tkinter GUI 和 pyautogui 实现
 支持全局快捷键控制开始/停止
-iOS 风格界面设计
+科技风格界面设计
 """
 
 import tkinter as tk
@@ -16,18 +16,24 @@ import threading
 # 禁用 pyautogui 的故障保护（可选，如果需要可以启用）
 # pyautogui.FAILSAFE = False
 
-# iOS 风格颜色方案
+# 科技风格颜色方案
 COLORS = {
-    'bg': '#f5f5f7',           # 背景色
-    'card': '#ffffff',          # 卡片背景
-    'primary': '#007AFF',       # 主色调（iOS蓝）
-    'primary_dark': '#0056b3',  # 主色调深色
-    'danger': '#FF3B30',        # 危险色（iOS红）
-    'success': '#34C759',       # 成功色（iOS绿）
-    'text': '#1d1d1f',          # 主文字
-    'text_secondary': '#86868b', # 次要文字
-    'border': '#e5e5e5',        # 边框色
-    'disabled': '#c7c7cc',      # 禁用色
+    'bg': '#0a0a0f',            # 深色背景
+    'bg_secondary': '#12121a',   # 次级背景
+    'card': '#1a1a2e',          # 卡片背景
+    'card_hover': '#252540',    # 卡片悬停
+    'primary': '#00d4ff',       # 主色调（霓虹青）
+    'primary_glow': '#00a8cc',  # 主色发光
+    'secondary': '#7b2cbf',     # 次要色（紫色）
+    'accent': '#ff006e',        # 强调色（霓虹粉）
+    'success': '#00ff88',       # 成功色（霓虹绿）
+    'danger': '#ff3366',        # 危险色（霓虹红）
+    'warning': '#ffaa00',       # 警告色
+    'text': '#ffffff',          # 主文字
+    'text_secondary': '#8888aa', # 次要文字
+    'border': '#2a2a4a',        # 边框色
+    'border_glow': '#00d4ff',   # 发光边框
+    'disabled': '#3a3a5a',      # 禁用色
 }
 
 
@@ -38,7 +44,7 @@ class HotkeyDialog:
         self.app = app
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("快捷键设置")
-        self.dialog.geometry("380x240")
+        self.dialog.geometry("400x280")
         self.dialog.resizable(False, False)
         self.dialog.transient(parent)
         self.dialog.grab_set()
@@ -46,8 +52,8 @@ class HotkeyDialog:
 
         # 居中显示
         self.dialog.update_idletasks()
-        x = parent.winfo_x() + (parent.winfo_width() - 380) // 2
-        y = parent.winfo_y() + (parent.winfo_height() - 240) // 2
+        x = parent.winfo_x() + (parent.winfo_width() - 400) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 280) // 2
         self.dialog.geometry(f"+{x}+{y}")
 
         self._create_widgets()
@@ -58,20 +64,20 @@ class HotkeyDialog:
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # 标题
-        title = tk.Label(main_frame, text="快捷键设置", font=("Segoe UI", 16, "bold"),
-                        bg=COLORS['bg'], fg=COLORS['text'])
-        title.pack(pady=(0, 15))
+        title = tk.Label(main_frame, text="⚡ 快捷键设置", font=("Consolas", 16, "bold"),
+                        bg=COLORS['bg'], fg=COLORS['primary'])
+        title.pack(pady=(0, 20))
 
         # 卡片容器
-        card = tk.Frame(main_frame, bg=COLORS['card'], highlightbackground=COLORS['border'],
-                       highlightthickness=1)
+        card = tk.Frame(main_frame, bg=COLORS['card'], highlightbackground=COLORS['border_glow'],
+                       highlightthickness=2)
         card.pack(fill="x", pady=5)
 
         # 开始/停止快捷键
         toggle_frame = tk.Frame(card, bg=COLORS['card'])
-        toggle_frame.pack(fill="x", padx=15, pady=12)
+        toggle_frame.pack(fill="x", padx=15, pady=15)
 
-        tk.Label(toggle_frame, text="开始/停止", font=("Segoe UI", 11),
+        tk.Label(toggle_frame, text="开始/停止", font=("Consolas", 11),
                 bg=COLORS['card'], fg=COLORS['text']).pack(side="left")
 
         self.toggle_hotkey_var = tk.StringVar(value=self.app._format_hotkey(self.app.hotkey_toggle))
@@ -80,13 +86,14 @@ class HotkeyDialog:
         toggle_btn_frame.pack(side="right")
 
         self.toggle_label = tk.Label(toggle_btn_frame, textvariable=self.toggle_hotkey_var,
-                                     font=("Segoe UI", 10), bg=COLORS['bg'], fg=COLORS['primary'],
-                                     padx=10, pady=3)
-        self.toggle_label.pack(side="left", padx=(0, 8))
+                                     font=("Consolas", 10), bg=COLORS['bg_secondary'],
+                                     fg=COLORS['primary'], padx=12, pady=4)
+        self.toggle_label.pack(side="left", padx=(0, 10))
 
-        self.set_toggle_btn = tk.Button(toggle_btn_frame, text="设置", font=("Segoe UI", 9),
-                                        bg=COLORS['primary'], fg="white", relief="flat",
-                                        padx=12, pady=2, cursor="hand2",
+        self.set_toggle_btn = tk.Button(toggle_btn_frame, text="设置", font=("Consolas", 9),
+                                        bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                        padx=15, pady=3, cursor="hand2",
+                                        activebackground=COLORS['primary_glow'],
                                         command=self._start_recording_toggle)
         self.set_toggle_btn.pack(side="left")
 
@@ -96,9 +103,9 @@ class HotkeyDialog:
 
         # 紧急停止快捷键
         stop_frame = tk.Frame(card, bg=COLORS['card'])
-        stop_frame.pack(fill="x", padx=15, pady=12)
+        stop_frame.pack(fill="x", padx=15, pady=15)
 
-        tk.Label(stop_frame, text="紧急停止", font=("Segoe UI", 11),
+        tk.Label(stop_frame, text="紧急停止", font=("Consolas", 11),
                 bg=COLORS['card'], fg=COLORS['text']).pack(side="left")
 
         self.stop_hotkey_var = tk.StringVar(value=self.app._format_hotkey(self.app.hotkey_stop))
@@ -107,24 +114,25 @@ class HotkeyDialog:
         stop_btn_frame.pack(side="right")
 
         self.stop_label = tk.Label(stop_btn_frame, textvariable=self.stop_hotkey_var,
-                                   font=("Segoe UI", 10), bg=COLORS['bg'], fg=COLORS['danger'],
-                                   padx=10, pady=3)
-        self.stop_label.pack(side="left", padx=(0, 8))
+                                   font=("Consolas", 10), bg=COLORS['bg_secondary'],
+                                   fg=COLORS['danger'], padx=12, pady=4)
+        self.stop_label.pack(side="left", padx=(0, 10))
 
-        self.set_stop_btn = tk.Button(stop_btn_frame, text="设置", font=("Segoe UI", 9),
-                                      bg=COLORS['primary'], fg="white", relief="flat",
-                                      padx=12, pady=2, cursor="hand2",
+        self.set_stop_btn = tk.Button(stop_btn_frame, text="设置", font=("Consolas", 9),
+                                      bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                      padx=15, pady=3, cursor="hand2",
+                                      activebackground=COLORS['primary_glow'],
                                       command=self._start_recording_stop)
         self.set_stop_btn.pack(side="left")
 
         # 提示
         tk.Label(main_frame, text="点击「设置」后按下快捷键组合",
-                font=("Segoe UI", 9), bg=COLORS['bg'], fg=COLORS['text_secondary']).pack(pady=(15, 0))
+                font=("Consolas", 9), bg=COLORS['bg'], fg=COLORS['text_secondary']).pack(pady=(20, 0))
 
     def _start_recording_toggle(self):
         self.app.is_recording_toggle = True
         self.app.recorded_keys = set()
-        self.toggle_hotkey_var.set("请按键...")
+        self.toggle_hotkey_var.set("等待输入...")
         self.set_toggle_btn.config(state="disabled", bg=COLORS['disabled'])
         self.set_stop_btn.config(state="disabled", bg=COLORS['disabled'])
         self.app.on_recording_complete = self._on_toggle_complete
@@ -138,7 +146,7 @@ class HotkeyDialog:
     def _start_recording_stop(self):
         self.app.is_recording_stop = True
         self.app.recorded_keys = set()
-        self.stop_hotkey_var.set("请按键...")
+        self.stop_hotkey_var.set("等待输入...")
         self.set_toggle_btn.config(state="disabled", bg=COLORS['disabled'])
         self.set_stop_btn.config(state="disabled", bg=COLORS['disabled'])
         self.app.on_recording_complete = self._on_stop_complete
@@ -155,8 +163,8 @@ class AutoClicker:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("自动点击器")
-        self.root.geometry("380x520")
+        self.root.title("Auto Clicker")
+        self.root.geometry("400x560")
         self.root.resizable(False, False)
         self.root.configure(bg=COLORS['bg'])
 
@@ -180,14 +188,17 @@ class AutoClicker:
         self._start_keyboard_listener()
 
     def _create_menu(self):
-        menubar = tk.Menu(self.root)
+        menubar = tk.Menu(self.root, bg=COLORS['bg'], fg=COLORS['text'],
+                         activebackground=COLORS['primary'], activeforeground=COLORS['bg'])
         self.root.config(menu=menubar)
 
-        settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu = tk.Menu(menubar, tearoff=0, bg=COLORS['card'], fg=COLORS['text'],
+                               activebackground=COLORS['primary'], activeforeground=COLORS['bg'])
         menubar.add_cascade(label="设置", menu=settings_menu)
         settings_menu.add_command(label="快捷键设置...", command=self._show_hotkey_dialog)
 
-        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu = tk.Menu(menubar, tearoff=0, bg=COLORS['card'], fg=COLORS['text'],
+                           activebackground=COLORS['primary'], activeforeground=COLORS['bg'])
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
 
@@ -197,27 +208,34 @@ class AutoClicker:
     def _show_about(self):
         messagebox.showinfo(
             "关于",
-            "自动点击器 v1.2\n\n"
-            "简洁现代的自动鼠标点击工具\n\n"
+            "Auto Clicker v2.0\n\n"
+            "科技风格自动鼠标点击工具\n\n"
             "默认快捷键:\n"
             "F6 - 开始/停止\n"
             "F7 - 紧急停止"
         )
 
     def _create_card(self, parent, title):
-        """创建 iOS 风格卡片"""
+        """创建科技风格卡片"""
         container = tk.Frame(parent, bg=COLORS['bg'])
-        container.pack(fill="x", padx=20, pady=(0, 12))
+        container.pack(fill="x", padx=20, pady=(0, 15))
 
         # 标题
         if title:
-            tk.Label(container, text=title, font=("Segoe UI", 11, "bold"),
-                    bg=COLORS['bg'], fg=COLORS['text_secondary']).pack(anchor="w", pady=(0, 6))
+            title_frame = tk.Frame(container, bg=COLORS['bg'])
+            title_frame.pack(fill="x", pady=(0, 8))
 
-        # 卡片
-        card = tk.Frame(container, bg=COLORS['card'], highlightbackground=COLORS['border'],
-                       highlightthickness=1)
-        card.pack(fill="x")
+            # 装饰线
+            tk.Frame(title_frame, width=3, height=14, bg=COLORS['primary']).pack(side="left", padx=(0, 8))
+            tk.Label(title_frame, text=title, font=("Consolas", 10, "bold"),
+                    bg=COLORS['bg'], fg=COLORS['text_secondary']).pack(side="left")
+
+        # 卡片（带发光边框效果）
+        card_outer = tk.Frame(container, bg=COLORS['border_glow'], padx=1, pady=1)
+        card_outer.pack(fill="x")
+
+        card = tk.Frame(card_outer, bg=COLORS['card'])
+        card.pack(fill="both", expand=True)
 
         return card
 
@@ -226,16 +244,25 @@ class AutoClicker:
         main_frame = tk.Frame(self.root, bg=COLORS['bg'])
         main_frame.pack(fill="both", expand=True, pady=15)
 
+        # ========== 标题区域 ==========
+        header = tk.Frame(main_frame, bg=COLORS['bg'])
+        header.pack(fill="x", padx=20, pady=(0, 15))
+
+        tk.Label(header, text="⚡ AUTO CLICKER", font=("Consolas", 18, "bold"),
+                bg=COLORS['bg'], fg=COLORS['primary']).pack(side="left")
+
         # ========== 点击间隔卡片 ==========
-        interval_card = self._create_card(main_frame, "点击间隔")
+        interval_card = self._create_card(main_frame, "INTERVAL")
         interval_inner = tk.Frame(interval_card, bg=COLORS['card'])
         interval_inner.pack(fill="x", padx=15, pady=12)
 
         self.interval_var = tk.StringVar(value="1000")
         interval_entry = tk.Entry(interval_inner, textvariable=self.interval_var,
-                                  font=("Segoe UI", 12), width=10, relief="flat",
-                                  bg=COLORS['bg'], fg=COLORS['text'],
-                                  insertbackground=COLORS['primary'])
+                                  font=("Consolas", 14), width=10, relief="flat",
+                                  bg=COLORS['bg_secondary'], fg=COLORS['primary'],
+                                  insertbackground=COLORS['primary'],
+                                  highlightthickness=1, highlightcolor=COLORS['primary'],
+                                  highlightbackground=COLORS['border'])
         interval_entry.pack(side="left")
         self.interval_entry = interval_entry
 
@@ -245,25 +272,29 @@ class AutoClicker:
 
         for unit in ["毫秒", "秒"]:
             rb = tk.Radiobutton(unit_frame, text=unit, variable=self.unit_var,
-                               value=unit, font=("Segoe UI", 10),
+                               value=unit, font=("Consolas", 10),
                                bg=COLORS['card'], fg=COLORS['text'],
-                               selectcolor=COLORS['card'], activebackground=COLORS['card'])
-            rb.pack(side="left", padx=5)
+                               selectcolor=COLORS['bg_secondary'],
+                               activebackground=COLORS['card'],
+                               activeforeground=COLORS['primary'])
+            rb.pack(side="left", padx=8)
 
         # ========== 点击类型卡片 ==========
-        type_card = self._create_card(main_frame, "点击类型")
+        type_card = self._create_card(main_frame, "CLICK TYPE")
 
         self.click_type_var = tk.StringVar(value="左键单击")
-        types = [("左键单击", "left"), ("右键单击", "right"), ("左键双击", "double")]
+        types = [("◉ 左键单击", "左键单击"), ("◉ 右键单击", "右键单击"), ("◉ 左键双击", "左键双击")]
 
         for i, (text, value) in enumerate(types):
             type_row = tk.Frame(type_card, bg=COLORS['card'])
             type_row.pack(fill="x", padx=15, pady=8)
 
             rb = tk.Radiobutton(type_row, text=text, variable=self.click_type_var,
-                               value=text, font=("Segoe UI", 11),
+                               value=value, font=("Consolas", 11),
                                bg=COLORS['card'], fg=COLORS['text'],
-                               selectcolor=COLORS['card'], activebackground=COLORS['card'])
+                               selectcolor=COLORS['bg_secondary'],
+                               activebackground=COLORS['card'],
+                               activeforeground=COLORS['primary'])
             rb.pack(side="left")
 
             if i < len(types) - 1:
@@ -271,19 +302,20 @@ class AutoClicker:
                 sep.pack(fill="x", padx=15)
 
         # ========== 点击位置卡片 ==========
-        pos_card = self._create_card(main_frame, "点击位置")
+        pos_card = self._create_card(main_frame, "POSITION")
 
         self.use_current_pos_var = tk.BooleanVar(value=True)
 
         # 当前位置选项
         current_row = tk.Frame(pos_card, bg=COLORS['card'])
-        current_row.pack(fill="x", padx=15, pady=8)
+        current_row.pack(fill="x", padx=15, pady=10)
 
-        current_cb = tk.Checkbutton(current_row, text="使用当前鼠标位置",
+        current_cb = tk.Checkbutton(current_row, text="☐ 使用当前鼠标位置",
                                     variable=self.use_current_pos_var,
-                                    font=("Segoe UI", 11), bg=COLORS['card'],
-                                    fg=COLORS['text'], selectcolor=COLORS['card'],
+                                    font=("Consolas", 11), bg=COLORS['card'],
+                                    fg=COLORS['text'], selectcolor=COLORS['bg_secondary'],
                                     activebackground=COLORS['card'],
+                                    activeforeground=COLORS['primary'],
                                     command=self._toggle_position_entry)
         current_cb.pack(side="left")
 
@@ -292,29 +324,36 @@ class AutoClicker:
 
         # 坐标输入
         coord_row = tk.Frame(pos_card, bg=COLORS['card'])
-        coord_row.pack(fill="x", padx=15, pady=10)
+        coord_row.pack(fill="x", padx=15, pady=12)
 
-        tk.Label(coord_row, text="X", font=("Segoe UI", 10),
-                bg=COLORS['card'], fg=COLORS['text_secondary']).pack(side="left")
+        tk.Label(coord_row, text="X", font=("Consolas", 10, "bold"),
+                bg=COLORS['card'], fg=COLORS['primary']).pack(side="left")
 
         self.x_var = tk.StringVar(value="0")
         self.x_entry = tk.Entry(coord_row, textvariable=self.x_var,
-                                font=("Segoe UI", 11), width=6, relief="flat",
-                                bg=COLORS['bg'], fg=COLORS['text'])
+                                font=("Consolas", 11), width=6, relief="flat",
+                                bg=COLORS['bg_secondary'], fg=COLORS['text'],
+                                insertbackground=COLORS['primary'],
+                                highlightthickness=1, highlightcolor=COLORS['primary'],
+                                highlightbackground=COLORS['border'])
         self.x_entry.pack(side="left", padx=(5, 15))
 
-        tk.Label(coord_row, text="Y", font=("Segoe UI", 10),
-                bg=COLORS['card'], fg=COLORS['text_secondary']).pack(side="left")
+        tk.Label(coord_row, text="Y", font=("Consolas", 10, "bold"),
+                bg=COLORS['card'], fg=COLORS['primary']).pack(side="left")
 
         self.y_var = tk.StringVar(value="0")
         self.y_entry = tk.Entry(coord_row, textvariable=self.y_var,
-                                font=("Segoe UI", 11), width=6, relief="flat",
-                                bg=COLORS['bg'], fg=COLORS['text'])
+                                font=("Consolas", 11), width=6, relief="flat",
+                                bg=COLORS['bg_secondary'], fg=COLORS['text'],
+                                insertbackground=COLORS['primary'],
+                                highlightthickness=1, highlightcolor=COLORS['primary'],
+                                highlightbackground=COLORS['border'])
         self.y_entry.pack(side="left", padx=5)
 
-        self.get_pos_btn = tk.Button(coord_row, text="获取", font=("Segoe UI", 9),
-                                     bg=COLORS['bg'], fg=COLORS['primary'],
-                                     relief="flat", padx=8, cursor="hand2",
+        self.get_pos_btn = tk.Button(coord_row, text="获取", font=("Consolas", 9),
+                                     bg=COLORS['bg_secondary'], fg=COLORS['primary'],
+                                     relief="flat", padx=10, cursor="hand2",
+                                     activebackground=COLORS['card'],
                                      command=self._get_current_position)
         self.get_pos_btn.pack(side="right")
 
@@ -324,13 +363,15 @@ class AutoClicker:
         btn_frame = tk.Frame(main_frame, bg=COLORS['bg'])
         btn_frame.pack(fill="x", padx=20, pady=(5, 0))
 
-        self.start_btn = tk.Button(btn_frame, text="开始", font=("Segoe UI", 12, "bold"),
-                                   bg=COLORS['primary'], fg="white", relief="flat",
-                                   height=2, cursor="hand2", command=self._start_clicking)
+        self.start_btn = tk.Button(btn_frame, text="▶ 开始", font=("Consolas", 12, "bold"),
+                                   bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                   height=2, cursor="hand2",
+                                   activebackground=COLORS['primary_glow'],
+                                   command=self._start_clicking)
         self.start_btn.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-        self.stop_btn = tk.Button(btn_frame, text="停止", font=("Segoe UI", 12, "bold"),
-                                  bg=COLORS['disabled'], fg="white", relief="flat",
+        self.stop_btn = tk.Button(btn_frame, text="■ 停止", font=("Consolas", 12, "bold"),
+                                  bg=COLORS['disabled'], fg=COLORS['text_secondary'], relief="flat",
                                   height=2, state="disabled", command=self._stop_clicking)
         self.stop_btn.pack(side="right", fill="x", expand=True, padx=(5, 0))
 
@@ -338,33 +379,33 @@ class AutoClicker:
         status_frame = tk.Frame(main_frame, bg=COLORS['bg'])
         status_frame.pack(fill="x", padx=20, pady=(15, 0))
 
-        self.status_var = tk.StringVar(value="已停止")
+        self.status_var = tk.StringVar(value="● STOPPED")
         self.status_label = tk.Label(status_frame, textvariable=self.status_var,
-                                     font=("Segoe UI", 14, "bold"),
-                                     bg=COLORS['bg'], fg=COLORS['text'])
+                                     font=("Consolas", 14, "bold"),
+                                     bg=COLORS['bg'], fg=COLORS['text_secondary'])
         self.status_label.pack()
 
         self.click_count = 0
-        self.count_var = tk.StringVar(value="点击次数: 0")
+        self.count_var = tk.StringVar(value="Clicks: 0")
         tk.Label(status_frame, textvariable=self.count_var,
-                font=("Segoe UI", 10), bg=COLORS['bg'],
+                font=("Consolas", 10), bg=COLORS['bg'],
                 fg=COLORS['text_secondary']).pack()
 
         # 快捷键提示
         self.hotkey_hint_var = tk.StringVar()
         self._update_hotkey_hint()
         tk.Label(status_frame, textvariable=self.hotkey_hint_var,
-                font=("Segoe UI", 9), bg=COLORS['bg'],
-                fg=COLORS['text_secondary']).pack(pady=(5, 0))
+                font=("Consolas", 9), bg=COLORS['bg'],
+                fg=COLORS['border']).pack(pady=(8, 0))
 
     def _update_hotkey_hint(self):
         toggle_key = self._format_hotkey(self.hotkey_toggle)
         stop_key = self._format_hotkey(self.hotkey_stop)
-        self.hotkey_hint_var.set(f"{toggle_key} 开始/停止 · {stop_key} 紧急停止")
+        self.hotkey_hint_var.set(f"[{toggle_key}] Toggle · [{stop_key}] Stop")
 
     def _format_hotkey(self, keys):
         if not keys:
-            return "未设置"
+            return "N/A"
 
         key_names = []
         for key in keys:
@@ -473,12 +514,16 @@ class AutoClicker:
 
     def _toggle_position_entry(self):
         if self.use_current_pos_var.get():
-            self.x_entry.config(state="disabled", bg=COLORS['disabled'])
-            self.y_entry.config(state="disabled", bg=COLORS['disabled'])
+            self.x_entry.config(state="disabled", bg=COLORS['disabled'],
+                               highlightbackground=COLORS['disabled'])
+            self.y_entry.config(state="disabled", bg=COLORS['disabled'],
+                               highlightbackground=COLORS['disabled'])
             self.get_pos_btn.config(state="disabled", fg=COLORS['disabled'])
         else:
-            self.x_entry.config(state="normal", bg=COLORS['bg'])
-            self.y_entry.config(state="normal", bg=COLORS['bg'])
+            self.x_entry.config(state="normal", bg=COLORS['bg_secondary'],
+                               highlightbackground=COLORS['border'])
+            self.y_entry.config(state="normal", bg=COLORS['bg_secondary'],
+                               highlightbackground=COLORS['border'])
             self.get_pos_btn.config(state="normal", fg=COLORS['primary'])
 
     def _get_current_position(self):
@@ -533,7 +578,7 @@ class AutoClicker:
                 pyautogui.doubleClick(x, y)
 
             self.click_count += 1
-            self.count_var.set(f"点击次数: {self.click_count}")
+            self.count_var.set(f"Clicks: {self.click_count}")
 
             interval = self._get_interval_ms()
             self.timer_id = self.root.after(interval, self._perform_click)
@@ -551,12 +596,12 @@ class AutoClicker:
 
         self.is_clicking = True
         self.click_count = 0
-        self.count_var.set("点击次数: 0")
+        self.count_var.set("Clicks: 0")
 
-        self.status_var.set("正在点击...")
+        self.status_var.set("● RUNNING")
         self.status_label.config(fg=COLORS['success'])
-        self.start_btn.config(state="disabled", bg=COLORS['disabled'])
-        self.stop_btn.config(state="normal", bg=COLORS['danger'], cursor="hand2")
+        self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
+        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg=COLORS['bg'], cursor="hand2")
 
         self.interval_entry.config(state="disabled")
 
@@ -569,10 +614,10 @@ class AutoClicker:
             self.root.after_cancel(self.timer_id)
             self.timer_id = None
 
-        self.status_var.set("已停止")
-        self.status_label.config(fg=COLORS['text'])
-        self.start_btn.config(state="normal", bg=COLORS['primary'], cursor="hand2")
-        self.stop_btn.config(state="disabled", bg=COLORS['disabled'], cursor="")
+        self.status_var.set("● STOPPED")
+        self.status_label.config(fg=COLORS['text_secondary'])
+        self.start_btn.config(state="normal", bg=COLORS['primary'], fg=COLORS['bg'], cursor="hand2")
+        self.stop_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'], cursor="")
 
         self.interval_entry.config(state="normal")
         self._toggle_position_entry()
