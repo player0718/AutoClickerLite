@@ -379,17 +379,21 @@ class AutoClicker:
         status_frame = tk.Frame(main_frame, bg=COLORS['bg'])
         status_frame.pack(fill="x", padx=20, pady=(15, 0))
 
+        # 状态指示器（带背景色块）
+        self.status_indicator = tk.Frame(status_frame, bg=COLORS['disabled'], padx=20, pady=8)
+        self.status_indicator.pack(fill="x", pady=(0, 10))
+
         self.status_var = tk.StringVar(value="● STOPPED")
-        self.status_label = tk.Label(status_frame, textvariable=self.status_var,
-                                     font=("Consolas", 14, "bold"),
-                                     bg=COLORS['bg'], fg=COLORS['text_secondary'])
+        self.status_label = tk.Label(self.status_indicator, textvariable=self.status_var,
+                                     font=("Consolas", 16, "bold"),
+                                     bg=COLORS['disabled'], fg="white")
         self.status_label.pack()
 
         self.click_count = 0
         self.count_var = tk.StringVar(value="Clicks: 0")
-        tk.Label(status_frame, textvariable=self.count_var,
-                font=("Consolas", 10), bg=COLORS['bg'],
-                fg=COLORS['text_secondary']).pack()
+        self.count_label = tk.Label(self.status_indicator, textvariable=self.count_var,
+                font=("Consolas", 11), bg=COLORS['disabled'], fg="white")
+        self.count_label.pack()
 
         # 快捷键提示
         self.hotkey_hint_var = tk.StringVar()
@@ -599,7 +603,9 @@ class AutoClicker:
         self.count_var.set("Clicks: 0")
 
         self.status_var.set("● RUNNING")
-        self.status_label.config(fg=COLORS['success'])
+        self.status_indicator.config(bg=COLORS['success'])
+        self.status_label.config(bg=COLORS['success'], fg="white")
+        self.count_label.config(bg=COLORS['success'], fg="white")
         self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
         self.stop_btn.config(state="normal", bg=COLORS['danger'], fg="white", cursor="hand2")
 
@@ -615,7 +621,9 @@ class AutoClicker:
             self.timer_id = None
 
         self.status_var.set("● STOPPED")
-        self.status_label.config(fg=COLORS['text_secondary'])
+        self.status_indicator.config(bg=COLORS['disabled'])
+        self.status_label.config(bg=COLORS['disabled'], fg="white")
+        self.count_label.config(bg=COLORS['disabled'], fg="white")
         self.start_btn.config(state="normal", bg=COLORS['primary'], fg="white", cursor="hand2")
         self.stop_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'], cursor="")
 
