@@ -16,24 +16,24 @@ import threading
 # 禁用 pyautogui 的故障保护（可选，如果需要可以启用）
 # pyautogui.FAILSAFE = False
 
-# 科技风格颜色方案
+# 浅色科技风格颜色方案
 COLORS = {
-    'bg': '#0a0a0f',            # 深色背景
-    'bg_secondary': '#12121a',   # 次级背景
-    'card': '#1a1a2e',          # 卡片背景
-    'card_hover': '#252540',    # 卡片悬停
-    'primary': '#00d4ff',       # 主色调（霓虹青）
-    'primary_glow': '#00a8cc',  # 主色发光
-    'secondary': '#7b2cbf',     # 次要色（紫色）
-    'accent': '#ff006e',        # 强调色（霓虹粉）
-    'success': '#00ff88',       # 成功色（霓虹绿）
-    'danger': '#ff3366',        # 危险色（霓虹红）
-    'warning': '#ffaa00',       # 警告色
-    'text': '#ffffff',          # 主文字
-    'text_secondary': '#8888aa', # 次要文字
-    'border': '#2a2a4a',        # 边框色
-    'border_glow': '#00d4ff',   # 发光边框
-    'disabled': '#3a3a5a',      # 禁用色
+    'bg': '#f0f2f5',            # 浅色背景
+    'bg_secondary': '#e4e6eb',   # 次级背景
+    'card': '#ffffff',          # 卡片背景
+    'card_hover': '#f5f5f5',    # 卡片悬停
+    'primary': '#0066ff',       # 主色调（科技蓝）
+    'primary_glow': '#0052cc',  # 主色深色
+    'secondary': '#6c5ce7',     # 次要色（紫色）
+    'accent': '#e84393',        # 强调色（粉色）
+    'success': '#00b894',       # 成功色（青绿）
+    'danger': '#ff4757',        # 危险色（红色）
+    'warning': '#ffa502',       # 警告色
+    'text': '#2d3436',          # 主文字
+    'text_secondary': '#636e72', # 次要文字
+    'border': '#dfe6e9',        # 边框色
+    'border_glow': '#0066ff',   # 发光边框
+    'disabled': '#b2bec3',      # 禁用色
 }
 
 
@@ -91,7 +91,7 @@ class HotkeyDialog:
         self.toggle_label.pack(side="left", padx=(0, 10))
 
         self.set_toggle_btn = tk.Button(toggle_btn_frame, text="设置", font=("Consolas", 9),
-                                        bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                        bg=COLORS['primary'], fg="white", relief="flat",
                                         padx=15, pady=3, cursor="hand2",
                                         activebackground=COLORS['primary_glow'],
                                         command=self._start_recording_toggle)
@@ -119,7 +119,7 @@ class HotkeyDialog:
         self.stop_label.pack(side="left", padx=(0, 10))
 
         self.set_stop_btn = tk.Button(stop_btn_frame, text="设置", font=("Consolas", 9),
-                                      bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                      bg=COLORS['primary'], fg="white", relief="flat",
                                       padx=15, pady=3, cursor="hand2",
                                       activebackground=COLORS['primary_glow'],
                                       command=self._start_recording_stop)
@@ -283,7 +283,7 @@ class AutoClicker:
         type_card = self._create_card(main_frame, "CLICK TYPE")
 
         self.click_type_var = tk.StringVar(value="左键单击")
-        types = [("◉ 左键单击", "左键单击"), ("◉ 右键单击", "右键单击"), ("◉ 左键双击", "左键双击")]
+        types = [("左键单击", "左键单击"), ("右键单击", "右键单击"), ("左键双击", "左键双击")]
 
         for i, (text, value) in enumerate(types):
             type_row = tk.Frame(type_card, bg=COLORS['card'])
@@ -310,7 +310,7 @@ class AutoClicker:
         current_row = tk.Frame(pos_card, bg=COLORS['card'])
         current_row.pack(fill="x", padx=15, pady=10)
 
-        current_cb = tk.Checkbutton(current_row, text="☐ 使用当前鼠标位置",
+        current_cb = tk.Checkbutton(current_row, text="使用当前鼠标位置",
                                     variable=self.use_current_pos_var,
                                     font=("Consolas", 11), bg=COLORS['card'],
                                     fg=COLORS['text'], selectcolor=COLORS['bg_secondary'],
@@ -364,7 +364,7 @@ class AutoClicker:
         btn_frame.pack(fill="x", padx=20, pady=(5, 0))
 
         self.start_btn = tk.Button(btn_frame, text="▶ 开始", font=("Consolas", 12, "bold"),
-                                   bg=COLORS['primary'], fg=COLORS['bg'], relief="flat",
+                                   bg=COLORS['primary'], fg="white", relief="flat",
                                    height=2, cursor="hand2",
                                    activebackground=COLORS['primary_glow'],
                                    command=self._start_clicking)
@@ -601,7 +601,7 @@ class AutoClicker:
         self.status_var.set("● RUNNING")
         self.status_label.config(fg=COLORS['success'])
         self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
-        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg=COLORS['bg'], cursor="hand2")
+        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg="white", cursor="hand2")
 
         self.interval_entry.config(state="disabled")
 
@@ -616,7 +616,7 @@ class AutoClicker:
 
         self.status_var.set("● STOPPED")
         self.status_label.config(fg=COLORS['text_secondary'])
-        self.start_btn.config(state="normal", bg=COLORS['primary'], fg=COLORS['bg'], cursor="hand2")
+        self.start_btn.config(state="normal", bg=COLORS['primary'], fg="white", cursor="hand2")
         self.stop_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'], cursor="")
 
         self.interval_entry.config(state="normal")
