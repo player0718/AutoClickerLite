@@ -16,6 +16,118 @@ import threading
 # pyautogui.FAILSAFE = False
 
 
+class HotkeyDialog:
+    """快捷键设置对话框"""
+
+    def __init__(self, parent, app):
+        """
+        初始化快捷键设置对话框
+
+        Args:
+            parent: 父窗口
+            app: AutoClicker 实例
+        """
+        self.app = app
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title("快捷键设置")
+        self.dialog.geometry("350x200")
+        self.dialog.resizable(False, False)
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+
+        # 居中显示
+        self.dialog.update_idletasks()
+        x = parent.winfo_x() + (parent.winfo_width() - 350) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 200) // 2
+        self.dialog.geometry(f"+{x}+{y}")
+
+        self._create_widgets()
+
+    def _create_widgets(self):
+        """创建对话框组件"""
+        main_frame = ttk.Frame(self.dialog, padding=15)
+        main_frame.pack(fill="both", expand=True)
+
+        # 开始/停止切换快捷键
+        toggle_frame = ttk.Frame(main_frame)
+        toggle_frame.pack(fill="x", pady=5)
+
+        ttk.Label(toggle_frame, text="开始/停止:", width=10).pack(side="left")
+        self.toggle_hotkey_var = tk.StringVar(value=self.app._format_hotkey(self.app.hotkey_toggle))
+        self.toggle_hotkey_label = ttk.Label(toggle_frame, textvariable=self.toggle_hotkey_var,
+                                              width=15, relief="sunken", anchor="center")
+        self.toggle_hotkey_label.pack(side="left", padx=5)
+
+        self.set_toggle_btn = ttk.Button(
+            toggle_frame,
+            text="设置",
+            command=self._start_recording_toggle,
+            width=8
+        )
+        self.set_toggle_btn.pack(side="left", padx=5)
+
+        # 紧急停止快捷键
+        stop_frame = ttk.Frame(main_frame)
+        stop_frame.pack(fill="x", pady=5)
+
+        ttk.Label(stop_frame, text="紧急停止:", width=10).pack(side="left")
+        self.stop_hotkey_var = tk.StringVar(value=self.app._format_hotkey(self.app.hotkey_stop))
+        self.stop_hotkey_label = ttk.Label(stop_frame, textvariable=self.stop_hotkey_var,
+                                            width=15, relief="sunken", anchor="center")
+        self.stop_hotkey_label.pack(side="left", padx=5)
+
+        self.set_stop_btn = ttk.Button(
+            stop_frame,
+            text="设置",
+            command=self._start_recording_stop,
+            width=8
+        )
+        self.set_stop_btn.pack(side="left", padx=5)
+
+        # 提示信息
+        ttk.Label(main_frame, text="点击「设置」后按下想要的快捷键组合",
+                  font=("微软雅黑", 8), foreground="gray").pack(pady=10)
+
+        # 关闭按钮
+        ttk.Button(main_frame, text="关闭", command=self.dialog.destroy, width=10).pack(pady=5)
+
+    def _start_recording_toggle(self):
+        """开始录入开始/停止快捷键"""
+        self.app.is_recording_toggle = True
+        self.app.recorded_keys = set()
+        self.toggle_hotkey_var.set("按下快捷键...")
+        self.set_toggle_btn.config(state="disabled")
+        self.set_stop_btn.config(state="disabled")
+
+        # 设置回调以更新对话框
+        self.app.on_recording_complete = self._on_toggle_complete
+
+    def _on_toggle_complete(self):
+        """录入开始/停止快捷键完成回调"""
+        self.toggle_hotkey_var.set(self.app._format_hotkey(self.app.hotkey_toggle))
+        self.set_toggle_btn.config(state="normal")
+        self.set_stop_btn.config(state="normal")
+        self.app.on_recording_complete = None
+
+    def _start_recording_stop(self):
+        """开始录入紧急停止快捷键"""
+        self.app.is_recording_stop = True
+        self.app.recorded_keys = set()
+        self.stop_hotkey_var.set("按下快捷键...")
+        self.set_toggle_btn.config(state="disabled")
+        self.set_stop_btn.config(state="disabled")
+
+        # 设置回调以更新对话框
+        self.app.on_recording_complete = self._on_stop_complete
+
+    def _on_stop_complete(self):
+        """录入紧急停止快捷键完成回调"""
+        self.stop_hotkey_var.set(self.app._format_hotkey(self.app.hotkey_stop))
+        self.set_toggle_btn.config(state="normal")
+        self.set_stop_btn.config(state="normal")
+        self.app.on_recording_complete = None
+
+
 class AutoClicker:
     """自动点击器主类"""
 
@@ -28,7 +140,7 @@ class AutoClicker:
         """
         self.root = root
         self.root.title("自动点击器")
-        self.root.geometry("400x580")
+        self.root.geometry("400x450")
         self.root.resizable(False, False)
 
         # 点击状态标志
@@ -48,12 +160,46 @@ class AutoClicker:
         self.is_recording_toggle = False
         self.is_recording_stop = False
         self.recorded_keys = set()
+        self.on_recording_complete = None  # 录入完成回调
+
+        # 创建菜单栏
+        self._create_menu()
 
         # 创建界面组件
         self._create_widgets()
 
         # 启动键盘监听器
         self._start_keyboard_listener()
+
+    def _create_menu(self):
+        """创建菜单栏"""
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        # 设置菜单
+        settings_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="设置", menu=settings_menu)
+        settings_menu.add_command(label="快捷键设置...", command=self._show_hotkey_dialog)
+
+        # 帮助菜单
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="帮助", menu=help_menu)
+        help_menu.add_command(label="关于", command=self._show_about)
+
+    def _show_hotkey_dialog(self):
+        """显示快捷键设置对话框"""
+        HotkeyDialog(self.root, self)
+
+    def _show_about(self):
+        """显示关于对话框"""
+        messagebox.showinfo(
+            "关于",
+            "自动点击器 v1.1\n\n"
+            "一个简单的 Windows 自动鼠标点击工具\n\n"
+            "默认快捷键:\n"
+            "F6 - 开始/停止\n"
+            "F7 - 紧急停止"
+        )
 
     def _create_widgets(self):
         """创建所有界面组件"""
@@ -129,50 +275,6 @@ class AutoClicker:
         # 初始状态下禁用坐标输入
         self._toggle_position_entry()
 
-        # ========== 快捷键设置区域 ==========
-        hotkey_frame = ttk.LabelFrame(self.root, text="快捷键设置", padding=10)
-        hotkey_frame.pack(fill="x", padx=10, pady=5)
-
-        # 开始/停止切换快捷键
-        toggle_frame = ttk.Frame(hotkey_frame)
-        toggle_frame.pack(fill="x", pady=2)
-
-        ttk.Label(toggle_frame, text="开始/停止:").pack(side="left")
-        self.toggle_hotkey_var = tk.StringVar(value=self._format_hotkey(self.hotkey_toggle))
-        self.toggle_hotkey_label = ttk.Label(toggle_frame, textvariable=self.toggle_hotkey_var,
-                                              width=15, relief="sunken", anchor="center")
-        self.toggle_hotkey_label.pack(side="left", padx=5)
-
-        self.set_toggle_btn = ttk.Button(
-            toggle_frame,
-            text="设置",
-            command=self._start_recording_toggle,
-            width=8
-        )
-        self.set_toggle_btn.pack(side="left", padx=5)
-
-        # 紧急停止快捷键
-        stop_frame = ttk.Frame(hotkey_frame)
-        stop_frame.pack(fill="x", pady=2)
-
-        ttk.Label(stop_frame, text="紧急停止:").pack(side="left")
-        self.stop_hotkey_var = tk.StringVar(value=self._format_hotkey(self.hotkey_stop))
-        self.stop_hotkey_label = ttk.Label(stop_frame, textvariable=self.stop_hotkey_var,
-                                            width=15, relief="sunken", anchor="center")
-        self.stop_hotkey_label.pack(side="left", padx=5)
-
-        self.set_stop_btn = ttk.Button(
-            stop_frame,
-            text="设置",
-            command=self._start_recording_stop,
-            width=8
-        )
-        self.set_stop_btn.pack(side="left", padx=5)
-
-        # 快捷键提示
-        ttk.Label(hotkey_frame, text="点击「设置」后按下想要的快捷键组合",
-                  font=("微软雅黑", 8), foreground="gray").pack(anchor="w")
-
         # ========== 控制按钮区域 ==========
         control_frame = ttk.Frame(self.root, padding=10)
         control_frame.pack(fill="x", padx=10, pady=5)
@@ -213,6 +315,12 @@ class AutoClicker:
         self.count_var = tk.StringVar(value="点击次数: 0")
         ttk.Label(status_frame, textvariable=self.count_var).pack()
 
+        # 快捷键提示
+        self.hotkey_hint_var = tk.StringVar()
+        self._update_hotkey_hint()
+        ttk.Label(status_frame, textvariable=self.hotkey_hint_var,
+                  font=("微软雅黑", 8), foreground="gray").pack()
+
         # ========== 提示信息 ==========
         tip_label = ttk.Label(
             self.root,
@@ -221,6 +329,12 @@ class AutoClicker:
             foreground="gray"
         )
         tip_label.pack(pady=5)
+
+    def _update_hotkey_hint(self):
+        """更新快捷键提示"""
+        toggle_key = self._format_hotkey(self.hotkey_toggle)
+        stop_key = self._format_hotkey(self.hotkey_stop)
+        self.hotkey_hint_var.set(f"快捷键: {toggle_key} 开始/停止, {stop_key} 紧急停止")
 
     def _format_hotkey(self, keys):
         """
@@ -349,43 +463,35 @@ class AutoClicker:
         else:
             self._start_clicking()
 
-    def _start_recording_toggle(self):
-        """开始录入开始/停止快捷键"""
-        self.is_recording_toggle = True
-        self.recorded_keys = set()
-        self.toggle_hotkey_var.set("按下快捷键...")
-        self.set_toggle_btn.config(state="disabled")
-        self.set_stop_btn.config(state="disabled")
-
     def _finish_recording_toggle(self):
         """完成录入开始/停止快捷键"""
         if self.recorded_keys:
             self.hotkey_toggle = self.recorded_keys.copy()
-            self.toggle_hotkey_var.set(self._format_hotkey(self.hotkey_toggle))
 
         self.is_recording_toggle = False
         self.recorded_keys = set()
-        self.set_toggle_btn.config(state="normal")
-        self.set_stop_btn.config(state="normal")
 
-    def _start_recording_stop(self):
-        """开始录入紧急停止快捷键"""
-        self.is_recording_stop = True
-        self.recorded_keys = set()
-        self.stop_hotkey_var.set("按下快捷键...")
-        self.set_toggle_btn.config(state="disabled")
-        self.set_stop_btn.config(state="disabled")
+        # 更新状态栏提示
+        self._update_hotkey_hint()
+
+        # 调用回调（如果有）
+        if self.on_recording_complete:
+            self.root.after(0, self.on_recording_complete)
 
     def _finish_recording_stop(self):
         """完成录入紧急停止快捷键"""
         if self.recorded_keys:
             self.hotkey_stop = self.recorded_keys.copy()
-            self.stop_hotkey_var.set(self._format_hotkey(self.hotkey_stop))
 
         self.is_recording_stop = False
         self.recorded_keys = set()
-        self.set_toggle_btn.config(state="normal")
-        self.set_stop_btn.config(state="normal")
+
+        # 更新状态栏提示
+        self._update_hotkey_hint()
+
+        # 调用回调（如果有）
+        if self.on_recording_complete:
+            self.root.after(0, self.on_recording_complete)
 
     def _toggle_position_entry(self):
         """切换坐标输入框的启用/禁用状态"""
