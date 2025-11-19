@@ -22,8 +22,8 @@ COLORS = {
     'bg_secondary': '#e4e6eb',   # 次级背景
     'card': '#ffffff',          # 卡片背景
     'card_hover': '#f5f5f5',    # 卡片悬停
-    'primary': '#a1c4fd',       # 主色调（渐变蓝）
-    'primary_glow': '#8bb4fc',  # 主色深色
+    'primary': '#4facfe',       # 主色调（渐变蓝）
+    'primary_glow': '#3d9be8',  # 主色深色
     'secondary': '#6c5ce7',     # 次要色（紫色）
     'accent': '#e84393',        # 强调色（粉色）
     'success': '#00b894',       # 成功色（青绿）
@@ -32,9 +32,9 @@ COLORS = {
     'text': '#2d3436',          # 主文字
     'text_secondary': '#636e72', # 次要文字
     'border': '#dfe6e9',        # 边框色
-    'border_glow': '#a1c4fd',   # 发光边框
+    'border_glow': '#4facfe',   # 发光边框
     'disabled': '#b2bec3',      # 禁用色
-    'gradient_start': '#a1c4fd', # 渐变起始色
+    'gradient_start': '#4facfe', # 渐变起始色
     'gradient_end': '#c2e9fb',   # 渐变结束色
 }
 
