@@ -39,6 +39,55 @@ COLORS = {
 }
 
 
+class CustomRadioButton(tk.Frame):
+    """自定义单选按钮，使用更好看的图标"""
+
+    def __init__(self, parent, text="", variable=None, value=None, font=None):
+        super().__init__(parent, bg=COLORS['card'])
+
+        self.variable = variable
+        self.value = value
+        self.selected = False
+
+        # 图标标签
+        self.icon_label = tk.Label(self, font=("Consolas", 12),
+                                   bg=COLORS['card'], fg=COLORS['border'],
+                                   width=2)
+        self.icon_label.pack(side="left")
+
+        # 文字标签
+        self.text_label = tk.Label(self, text=text, font=font or ("Consolas", 11),
+                                   bg=COLORS['card'], fg=COLORS['text'])
+        self.text_label.pack(side="left")
+
+        # 绑定点击事件
+        self.bind("<Button-1>", self._on_click)
+        self.icon_label.bind("<Button-1>", self._on_click)
+        self.text_label.bind("<Button-1>", self._on_click)
+
+        # 绑定变量追踪
+        if self.variable:
+            self.variable.trace_add("write", self._on_variable_change)
+            self._update_icon()
+
+    def _on_click(self, event):
+        if self.variable:
+            self.variable.set(self.value)
+
+    def _on_variable_change(self, *args):
+        self._update_icon()
+
+    def _update_icon(self):
+        if self.variable and self.variable.get() == self.value:
+            # 选中状态 - 使用填充圆点
+            self.icon_label.config(text="●", fg=COLORS['primary'])
+            self.selected = True
+        else:
+            # 未选中状态 - 使用空心圆
+            self.icon_label.config(text="○", fg=COLORS['border'])
+            self.selected = False
+
+
 class GradientButton(tk.Canvas):
     """渐变背景按钮"""
 
@@ -407,12 +456,8 @@ class AutoClicker:
             type_row = tk.Frame(type_card, bg=COLORS['card'])
             type_row.pack(fill="x", padx=15, pady=8)
 
-            rb = tk.Radiobutton(type_row, text=text, variable=self.click_type_var,
-                               value=value, font=("Consolas", 11),
-                               bg=COLORS['card'], fg=COLORS['text'],
-                               selectcolor=COLORS['bg_secondary'],
-                               activebackground=COLORS['card'],
-                               activeforeground=COLORS['primary'])
+            rb = CustomRadioButton(type_row, text=text, variable=self.click_type_var,
+                                   value=value)
             rb.pack(side="left")
 
             if i < len(types) - 1:
