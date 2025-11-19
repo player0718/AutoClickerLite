@@ -164,7 +164,7 @@ class AutoClicker:
     def __init__(self, root):
         self.root = root
         self.root.title("Auto Clicker")
-        self.root.geometry("400x620")
+        self.root.geometry("400x680")
         self.root.resizable(False, False)
         self.root.configure(bg=COLORS['bg'])
 
@@ -278,6 +278,32 @@ class AutoClicker:
                                activebackground=COLORS['card'],
                                activeforeground=COLORS['primary'])
             rb.pack(side="left", padx=8)
+
+        # 分隔线
+        sep = tk.Frame(interval_card, height=1, bg=COLORS['border'])
+        sep.pack(fill="x", padx=15)
+
+        # 延迟启动设置
+        delay_inner = tk.Frame(interval_card, bg=COLORS['card'])
+        delay_inner.pack(fill="x", padx=15, pady=12)
+
+        tk.Label(delay_inner, text="延迟启动", font=("Consolas", 10),
+                bg=COLORS['card'], fg=COLORS['text_secondary']).pack(side="left")
+
+        delay_right = tk.Frame(delay_inner, bg=COLORS['card'])
+        delay_right.pack(side="right")
+
+        self.delay_var = tk.StringVar(value="0")
+        self.delay_entry = tk.Entry(delay_right, textvariable=self.delay_var,
+                                    font=("Consolas", 12), width=5, relief="flat",
+                                    bg=COLORS['bg_secondary'], fg=COLORS['text'],
+                                    insertbackground=COLORS['primary'],
+                                    highlightthickness=1, highlightcolor=COLORS['primary'],
+                                    highlightbackground=COLORS['border'])
+        self.delay_entry.pack(side="left", padx=(0, 5))
+
+        tk.Label(delay_right, text="秒", font=("Consolas", 10),
+                bg=COLORS['card'], fg=COLORS['text']).pack(side="left")
 
         # ========== 点击类型卡片 ==========
         type_card = self._create_card(main_frame, "CLICK TYPE")
@@ -544,6 +570,15 @@ class AutoClicker:
             messagebox.showerror("输入错误", "请输入有效的时间间隔（正整数）")
             return False
 
+        # 验证延迟时间
+        try:
+            delay = int(self.delay_var.get())
+            if delay < 0:
+                raise ValueError()
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效的延迟时间（非负整数）")
+            return False
+
         if not self.use_current_pos_var.get():
             try:
                 x = int(self.x_var.get())
@@ -598,6 +633,41 @@ class AutoClicker:
         if not self._validate_inputs():
             return
 
+        # 禁用控件
+        self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
+        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg="white", cursor="hand2")
+        self.interval_entry.config(state="disabled")
+        self.delay_entry.config(state="disabled")
+
+        # 获取延迟时间
+        delay = int(self.delay_var.get())
+
+        if delay > 0:
+            # 开始倒计时
+            self.countdown_remaining = delay
+            self._countdown()
+        else:
+            # 直接开始点击
+            self._actually_start_clicking()
+
+    def _countdown(self):
+        """倒计时"""
+        if self.countdown_remaining > 0:
+            # 显示倒计时
+            self.status_var.set(f"● STARTING IN {self.countdown_remaining}s")
+            self.status_indicator.config(bg=COLORS['warning'])
+            self.status_label.config(bg=COLORS['warning'], fg="white")
+            self.count_label.config(bg=COLORS['warning'], fg="white")
+            self.count_var.set("准备中...")
+
+            self.countdown_remaining -= 1
+            self.timer_id = self.root.after(1000, self._countdown)
+        else:
+            # 倒计时结束，开始点击
+            self._actually_start_clicking()
+
+    def _actually_start_clicking(self):
+        """实际开始自动点击"""
         self.is_clicking = True
         self.click_count = 0
         self.count_var.set("Clicks: 0")
@@ -606,10 +676,6 @@ class AutoClicker:
         self.status_indicator.config(bg=COLORS['success'])
         self.status_label.config(bg=COLORS['success'], fg="white")
         self.count_label.config(bg=COLORS['success'], fg="white")
-        self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
-        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg="white", cursor="hand2")
-
-        self.interval_entry.config(state="disabled")
 
         self._perform_click()
 
@@ -628,6 +694,7 @@ class AutoClicker:
         self.stop_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'], cursor="")
 
         self.interval_entry.config(state="normal")
+        self.delay_entry.config(state="normal")
         self._toggle_position_entry()
 
     def cleanup(self):
