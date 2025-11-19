@@ -29,8 +29,8 @@ COLORS = {
     'success': '#00b894',       # 成功色（青绿）
     'danger': '#ff4757',        # 危险色（红色）
     'warning': '#ffa502',       # 警告色
-    'text': '#2d3436',          # 主文字
-    'text_secondary': '#636e72', # 次要文字
+    'text': '#1e3a5f',          # 主文字（深蓝色）
+    'text_secondary': '#4a6fa5', # 次要文字（中蓝色）
     'border': '#dfe6e9',        # 边框色
     'border_glow': '#4facfe',   # 发光边框
     'disabled': '#b2bec3',      # 禁用色
