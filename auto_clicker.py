@@ -412,13 +412,9 @@ class AutoClicker:
         unit_frame.pack(side="right")
 
         for unit in ["毫秒", "秒"]:
-            rb = tk.Radiobutton(unit_frame, text=unit, variable=self.unit_var,
-                               value=unit, font=("Consolas", 10),
-                               bg=COLORS['card'], fg=COLORS['text'],
-                               selectcolor=COLORS['bg_secondary'],
-                               activebackground=COLORS['card'],
-                               activeforeground=COLORS['primary'])
-            rb.pack(side="left", padx=8)
+            rb = CustomRadioButton(unit_frame, text=unit, variable=self.unit_var,
+                                   value=unit, font=("Consolas", 10))
+            rb.pack(side="left", padx=4)
 
         # 分隔线
         sep = tk.Frame(interval_card, height=1, bg=COLORS['border'])
