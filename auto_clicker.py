@@ -34,7 +34,99 @@ COLORS = {
     'border': '#dfe6e9',        # 边框色
     'border_glow': '#0066ff',   # 发光边框
     'disabled': '#b2bec3',      # 禁用色
+    'gradient_start': '#a1c4fd', # 渐变起始色
+    'gradient_end': '#c2e9fb',   # 渐变结束色
 }
+
+
+class GradientButton(tk.Canvas):
+    """渐变背景按钮"""
+
+    def __init__(self, parent, text="", command=None, width=120, height=50,
+                 gradient_start=None, gradient_end=None, fg="white", font=None,
+                 disabled_color=None):
+        super().__init__(parent, width=width, height=height,
+                        highlightthickness=0, bd=0)
+
+        self.command = command
+        self.text = text
+        self.fg = fg
+        self.font = font or ("Consolas", 12, "bold")
+        self.width = width
+        self.height = height
+        self.gradient_start = gradient_start or COLORS['gradient_start']
+        self.gradient_end = gradient_end or COLORS['gradient_end']
+        self.disabled_color = disabled_color or COLORS['disabled']
+        self.enabled = True
+
+        self._draw_gradient()
+        self._draw_text()
+
+        # 绑定事件
+        self.bind("<Button-1>", self._on_click)
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+
+    def _interpolate_color(self, color1, color2, factor):
+        """在两个颜色之间插值"""
+        r1, g1, b1 = int(color1[1:3], 16), int(color1[3:5], 16), int(color1[5:7], 16)
+        r2, g2, b2 = int(color2[1:3], 16), int(color2[3:5], 16), int(color2[5:7], 16)
+
+        r = int(r1 + (r2 - r1) * factor)
+        g = int(g1 + (g2 - g1) * factor)
+        b = int(b1 + (b2 - b1) * factor)
+
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+    def _draw_gradient(self):
+        """绘制渐变背景"""
+        self.delete("gradient")
+
+        if not self.enabled:
+            # 禁用状态使用纯色
+            self.create_rectangle(0, 0, self.width, self.height,
+                                 fill=self.disabled_color, outline="", tags="gradient")
+        else:
+            # 绘制水平渐变
+            for i in range(self.width):
+                factor = i / self.width
+                color = self._interpolate_color(self.gradient_start, self.gradient_end, factor)
+                self.create_line(i, 0, i, self.height, fill=color, tags="gradient")
+
+    def _draw_text(self):
+        """绘制按钮文字"""
+        self.delete("text")
+        text_color = self.fg if self.enabled else COLORS['text_secondary']
+        self.create_text(self.width // 2, self.height // 2, text=self.text,
+                        fill=text_color, font=self.font, tags="text")
+
+    def _on_click(self, event):
+        """点击事件"""
+        if self.enabled and self.command:
+            self.command()
+
+    def _on_enter(self, event):
+        """鼠标进入"""
+        if self.enabled:
+            self.configure(cursor="hand2")
+
+    def _on_leave(self, event):
+        """鼠标离开"""
+        self.configure(cursor="")
+
+    def set_enabled(self, enabled):
+        """设置启用/禁用状态"""
+        self.enabled = enabled
+        self._draw_gradient()
+        self._draw_text()
+
+    def set_colors(self, gradient_start=None, gradient_end=None):
+        """设置渐变颜色"""
+        if gradient_start:
+            self.gradient_start = gradient_start
+        if gradient_end:
+            self.gradient_end = gradient_end
+        self._draw_gradient()
 
 
 class HotkeyDialog:
@@ -389,17 +481,22 @@ class AutoClicker:
         btn_frame = tk.Frame(main_frame, bg=COLORS['bg'])
         btn_frame.pack(fill="x", padx=20, pady=(5, 0))
 
-        self.start_btn = tk.Button(btn_frame, text="▶ 开始", font=("Consolas", 12, "bold"),
-                                   bg=COLORS['primary'], fg="white", relief="flat",
-                                   height=2, cursor="hand2",
-                                   activebackground=COLORS['primary_glow'],
-                                   command=self._start_clicking)
-        self.start_btn.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        # 开始按钮（渐变背景）
+        self.start_btn = GradientButton(btn_frame, text="▶ 开始",
+                                        command=self._start_clicking,
+                                        width=170, height=50,
+                                        fg=COLORS['text'])
+        self.start_btn.pack(side="left", padx=(0, 5))
 
-        self.stop_btn = tk.Button(btn_frame, text="■ 停止", font=("Consolas", 12, "bold"),
-                                  bg=COLORS['disabled'], fg=COLORS['text_secondary'], relief="flat",
-                                  height=2, state="disabled", command=self._stop_clicking)
-        self.stop_btn.pack(side="right", fill="x", expand=True, padx=(5, 0))
+        # 停止按钮（渐变背景，初始禁用）
+        self.stop_btn = GradientButton(btn_frame, text="■ 停止",
+                                       command=self._stop_clicking,
+                                       width=170, height=50,
+                                       gradient_start=COLORS['danger'],
+                                       gradient_end='#ff6b81',
+                                       fg="white")
+        self.stop_btn.set_enabled(False)
+        self.stop_btn.pack(side="right", padx=(5, 0))
 
         # ========== 状态显示 ==========
         status_frame = tk.Frame(main_frame, bg=COLORS['bg'])
@@ -634,8 +731,8 @@ class AutoClicker:
             return
 
         # 禁用控件
-        self.start_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'])
-        self.stop_btn.config(state="normal", bg=COLORS['danger'], fg="white", cursor="hand2")
+        self.start_btn.set_enabled(False)
+        self.stop_btn.set_enabled(True)
         self.interval_entry.config(state="disabled")
         self.delay_entry.config(state="disabled")
 
@@ -690,8 +787,8 @@ class AutoClicker:
         self.status_indicator.config(bg=COLORS['disabled'])
         self.status_label.config(bg=COLORS['disabled'], fg="white")
         self.count_label.config(bg=COLORS['disabled'], fg="white")
-        self.start_btn.config(state="normal", bg=COLORS['primary'], fg="white", cursor="hand2")
-        self.stop_btn.config(state="disabled", bg=COLORS['disabled'], fg=COLORS['text_secondary'], cursor="")
+        self.start_btn.set_enabled(True)
+        self.stop_btn.set_enabled(False)
 
         self.interval_entry.config(state="normal")
         self.delay_entry.config(state="normal")
